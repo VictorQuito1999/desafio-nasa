@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard NASA 1962 · Cohete Experimental · Métodos Numéricos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  box-sizing: border-box;
+  --bg: #edf2f7;
+  --card: #edf2f7;
+  --ink: #1e293b;
+  --ink-secondary: #334155;
+  --mute: #64748b;
+  --line: #cbd5e1;
+  --lo: #cfd8e3;
+  --hi: #ffffff;
+  --primary: #1d4ed8;
+  --a: #c7401c; /* Numérico */
+  --b: #17667f; /* Solución analítica */
+  --ok: #1f7a45;
+  --bad: #b3261e;
+  --ok-bg: #edf8f1;
+  --bad-bg: #fdf0f0;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Contenedor Dashboard Amplio Horizontal */
+main {
+  width: 96%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+/* Encabezado */
+.hero {
+  margin-bottom: 22px;
+}
+.hero-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: var(--bg);
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: 4px 4px 8px var(--lo), -4px -4px 8px var(--hi);
+}
+.hero-sub {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mute);
+}
+
+h1 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(26px, 3.5vw, 36px);
+  line-height: 1.15;
+  color: var(--ink);
+  margin: 2px 0 6px;
+}
+p.lead {
+  font-size: 15px;
+  color: var(--ink-secondary);
+  max-width: 100ch;
+  margin: 0;
+}
+
+/* Estructura Dashboard en Rejillas Horizontales */
+.dashboard-top {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+@media (min-width: 1100px) {
+  .dashboard-top {
+    grid-template-columns: 1.05fr 1fr;
+    align-items: stretch;
+  }
+}
+
+.col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.col-right {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tarjetas Neumórficas */
+section {
+  background: var(--bg);
+  border-radius: 22px;
+  padding: 22px 24px;
+  box-shadow: 8px 8px 18px var(--lo), -8px -8px 18px var(--hi);
+}
+
+.telemetry-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+h2 {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--mute);
+  background: var(--bg);
+  box-shadow: inset 2px 2px 4px var(--lo), inset -2px -2px 4px var(--hi);
+}
+
+/* Iconos de tamaño controlado */
+.icon {
+  width: 19px;
+  height: 19px;
+  display: inline-block;
+  vertical-align: -3px;
+  flex-shrink: 0;
+}
+
+/* Formularios Neumórficos */
+.grid-params {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+}
+label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--mute);
+  margin-bottom: 5px;
+  display: block;
+}
+input, select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--bg);
+  border: 0;
+  border-radius: 11px;
+  box-shadow: inset 3px 3px 6px var(--lo), inset -3px -3px 6px var(--hi);
+  outline: none;
+  transition: all 0.2s ease;
+}
+input:focus, select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* Botón sutil neumórfico */
+.btn-neu {
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--mute);
+  background: var(--bg);
+  border: 0;
+  border-radius: 9px;
+  padding: 5px 11px;
+  cursor: pointer;
+  box-shadow: 4px 4px 8px var(--lo), -4px -4px 8px var(--hi);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+.btn-neu:hover {
+  color: var(--primary);
+  box-shadow: 2px 2px 5px var(--lo), -2px -2px 5px var(--hi);
+}
+.btn-neu:active {
+  box-shadow: inset 2px 2px 5px var(--lo), inset -2px -2px 5px var(--hi);
+}
+
+/* Caja de Fórmula */
+.eq-box {
+  margin-top: 14px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: inset 3px 3px 6px var(--lo), inset -3px -3px 6px var(--hi);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  color: var(--ink-secondary);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* Selector de paso h */
+.steps-wrapper {
+  margin: 12px 0 16px;
+}
+.steps-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mute);
+  margin-bottom: 8px;
+}
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.steps button {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--bg);
+  border: 0;
+  border-radius: 12px;
+  padding: 9px 14px;
+  cursor: pointer;
+  box-shadow: 4px 4px 9px var(--lo), -4px -4px 9px var(--hi);
+  transition: all 0.15s ease;
+}
+.steps button:hover {
+  box-shadow: 2px 2px 5px var(--lo), -2px -2px 5px var(--hi);
+  color: var(--primary);
+}
+.steps button[aria-pressed="true"] {
+  box-shadow: inset 3px 3px 6px var(--lo), inset -3px -3px 6px var(--hi);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* Tarjetas KPI de Resultados */
+.res {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.metric-card {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 5px 5px 12px var(--lo), -5px -5px 12px var(--hi);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.metric-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+  margin-bottom: 4px;
+}
+.metric-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.metric-val {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.metric-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mute);
+}
+.metric-meta {
+  font-size: 12px;
+  color: var(--mute);
+  border-top: 1px solid rgba(200, 210, 225, 0.6);
+  padding-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.metric-meta b {
+  color: var(--ink);
+  font-family: "IBM Plex Mono", monospace;
+}
+
+/* Verificaciones de tolerancia */
+.chk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+.chk {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: inset 3px 3px 6px var(--lo), inset -3px -3px 6px var(--hi);
+  border-left: 5px solid var(--line);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chk.ok {
+  border-left-color: var(--ok);
+}
+.chk.no {
+  border-left-color: var(--bad);
+}
+.chk-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 2px 2px 4px var(--lo), -2px -2px 4px var(--hi);
+}
+.chk.ok .chk-icon {
+  background: var(--ok);
+  color: #ffffff;
+}
+.chk.no .chk-icon {
+  background: var(--bad);
+  color: #ffffff;
+}
+
+/* Banner de mensaje general */
+.msg-banner {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  box-shadow: 4px 4px 10px var(--lo), -4px -4px 10px var(--hi);
+}
+.msg-banner.msg-ok {
+  border-left: 5px solid var(--ok);
+  color: #065f46;
+}
+.msg-banner.msg-no {
+  border-left: 5px solid var(--bad);
+  color: #991b1b;
+}
+
+/* Sección de Gráficas Más Grandes (Dashboard Panorámico) */
+.charts-section {
+  margin-bottom: 24px;
+}
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+}
+@media (min-width: 960px) {
+  .charts-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.chart-card-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.chart-well {
+  background: var(--bg);
+  border-radius: 18px;
+  padding: 16px 18px 12px;
+  box-shadow: inset 4px 4px 9px var(--lo), inset -4px -4px 9px var(--hi);
+}
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+.chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.chart-unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mute);
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: inset 2px 2px 4px var(--lo), inset -2px -2px 4px var(--hi);
+}
+.chart-well svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.leg {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mute);
+}
+.leg-dot {
+  display: inline-block;
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Tablas Neumórficas */
+.scroll {
+  overflow-x: auto;
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow: inset 3px 3px 8px var(--lo), inset -3px -3px 8px var(--hi);
+}
+.scroll-telemetry {
+  flex: 1;
+  max-height: 540px;
+  overflow-y: auto;
+}
+.scroll-max {
+  max-height: 380px;
+  overflow-y: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+th {
+  color: var(--mute);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 9px 12px;
+  border-bottom: 2px solid var(--lo);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 2;
+}
+td {
+  padding: 7px 12px;
+  color: var(--ink);
+  border-bottom: 1px solid rgba(200, 210, 225, 0.45);
+  white-space: nowrap;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+}
+th:first-child, td:first-child {
+  text-align: left;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 600;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Grilla inferior para comparaciones */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  margin-bottom: 24px;
+}
+@media (min-width: 960px) {
+  .comparison-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Preguntas del desafío y reflexión */
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (min-width: 860px) {
+  .qa-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.qa-card {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 5px 5px 12px var(--lo), -5px -5px 12px var(--hi);
+}
+.qa-card.full-width {
+  grid-column: 1 / -1;
+}
+.qa-card h3 {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.qa-num {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  box-shadow: inset 2px 2px 4px var(--lo), inset -2px -2px 4px var(--hi);
+}
+.qa-card p, .qa-card li {
+  color: var(--ink-secondary);
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin: 5px 0;
+}
+.qa-card ul {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+.callout {
+  margin-top: 18px;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: 6px 6px 14px var(--lo), -6px -6px 14px var(--hi);
+  border-left: 6px solid var(--primary);
+}
+.callout-title {
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--primary);
+  margin-bottom: 5px;
+}
+.callout p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-secondary);
+}
+
+@media (max-width: 640px) {
+  main { width: 100%; padding: 16px 12px; }
+  section { padding: 16px 14px; border-radius: 16px; }
+  .grid-params { grid-template-columns: 1fr 1fr; }
+  .metric-val { font-size: 24px; }
+}
+
+@media print {
+  body { background: #ffffff !important; color: #000000 !important; }
+  main { width: 100% !important; max-width: 100% !important; padding: 0 !important; }
+  section, .metric-card, .chart-well, .qa-card, .callout {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    break-inside: avoid;
+  }
+  .btn-neu, .pill-badge { display: none !important; }
+  .scroll-telemetry, .scroll-max { max-height: none !important; overflow: visible !important; }
+}
+</style>
+</head>
+<body>
+<main>
+
+  <!-- Encabezado -->
+  <header class="hero">
+    <div class="hero-head">
+      <div class="pill-badge">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        NASA Langley · 1962 · Telemetría y Métodos Numéricos
+      </div>
+      <div class="hero-sub">Simulación Interactiva en Tiempo Real</div>
+    </div>
+    <h1>Cohete experimental, 1962</h1>
+    <p class="lead">Simulación de ascenso vertical gobernada por la segunda ley de Newton: <strong>m·v′ = T − m·g − k·v</strong>. Modifica los parámetros o el paso de integración a la izquierda y observa la actualización inmediata de la telemetría en la tabla derecha y en los gráficos panorámicos inferiores.</p>
+  </header>
+
+  <!-- FILA SUPERIOR DEL DASHBOARD: Parámetros + Desafío (Izq) y Telemetría en Vivo (Der) -->
+  <div class="dashboard-top">
+    
+    <!-- Columna Izquierda: Parámetros y Desafío de Precisión -->
+    <div class="col-left">
+      
+      <!-- Parámetros del modelo -->
+      <section>
+        <div class="sec-head">
+          <h2>
+            <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Parámetros del modelo
+          </h2>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="btn-neu" id="btnReset" title="Restaurar parámetros originales del desafío de 1962">↺ Valores 1962</button>
+            <span class="sec-tag">Variables</span>
+          </div>
+        </div>
+        <div class="grid-params">
+          <div class="field"><label for="m">Masa m (kg)</label><input id="m" type="number" value="1000" step="any"></div>
+          <div class="field"><label for="T">Empuje T (N)</label><input id="T" type="number" value="15000" step="any"></div>
+          <div class="field"><label for="g">Gravedad g (m/s²)</label><input id="g" type="number" value="9.81" step="any"></div>
+          <div class="field"><label for="k">Resistencia k (kg/s)</label><input id="k" type="number" value="100" step="any"></div>
+          <div class="field"><label for="tf">Tiempo final tf (s)</label><input id="tf" type="number" value="20" step="any"></div>
+          <div class="field"><label for="h">Paso h (s)</label><select id="h"><option>2</option><option>1</option><option>0.5</option><option>0.25</option></select></div>
+          <div class="field"><label for="met">Método</label><select id="met"><option value="euler">Euler</option><option value="heun">Heun</option><option value="rk4">Runge-Kutta 4</option></select></div>
+        </div>
+        <div class="eq-box" id="eq"></div>
+      </section>
+
+      <!-- Desafío de precisión -->
+      <section>
+        <div class="sec-head">
+          <h2>
+            <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Desafío: tú decides la precisión
+          </h2>
+          <span class="sec-tag">Control de Calidad</span>
+        </div>
+        <p style="color:var(--ink-secondary); margin:0 0 12px; font-size:13.5px;">
+          Elige el paso de integración <code>h</code> para evaluar el cumplimiento de tolerancias antes del despegue:
+        </p>
+
+        <div class="steps-wrapper">
+          <div class="steps" id="sb"></div>
+        </div>
+
+        <!-- Tarjetas de métricas KPI -->
+        <div class="res" id="res"></div>
+
+        <!-- Validación de tolerancia -->
+        <div class="chk-grid">
+          <div class="chk" id="c1"></div>
+          <div class="chk" id="c2"></div>
+        </div>
+
+        <!-- Dictamen de vuelo -->
+        <div id="msg" class="msg-banner"></div>
+      </section>
+
+    </div>
+
+    <!-- Columna Derecha: Tabla de Iteraciones en Tiempo Real (Telemetría al lado de controles) -->
+    <div class="col-right">
+      <section class="telemetry-card">
+        <div class="sec-head">
+          <h2>
+            <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Tabla de iteraciones
+          </h2>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="btn-neu" id="btnExportCsv" title="Exportar telemetría a formato CSV para Excel/Python">📥 Descargar CSV</button>
+            <span class="sec-tag" id="tabCount">Telemetría en Vivo</span>
+          </div>
+        </div>
+        <p style="color:var(--ink-secondary); margin:0 0 10px; font-size:13px;">
+          Evolución punto a punto del tiempo \(t\), velocidad \(v(t)\), altura \(y(t)\) y sus respectivos errores:
+        </p>
+        <div class="scroll scroll-telemetry">
+          <table id="tab"></table>
+        </div>
+      </section>
+    </div>
+
+  </div>
+
+  <!-- SEGUNDA FILA: Gráficas Panorámicas Más Grandes -->
+  <section class="charts-section">
+    <div class="sec-head">
+      <h2>
+        <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Dinámica de Vuelo y Trayectorias Panorámicas
+      </h2>
+      <div class="leg">
+        <span><i class="leg-dot" style="background:var(--a)"></i> Método numérico</span>
+        <span><i class="leg-dot" style="background:var(--b)"></i> Solución analítica exacta</span>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card-wrap">
+        <div class="chart-header">
+          <span class="chart-title">Velocidad v(t)</span>
+          <span class="chart-unit">metros / segundo (m/s)</span>
+        </div>
+        <div id="g1" class="chart-well"></div>
+      </div>
+      <div class="chart-card-wrap">
+        <div class="chart-header">
+          <span class="chart-title">Altitud y(t)</span>
+          <span class="chart-unit">metros (m)</span>
+        </div>
+        <div id="g2" class="chart-well"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TERCERA FILA: Comparativa de Métodos y Efecto del Paso en Paralelo -->
+  <div class="comparison-grid">
+    
+    <!-- Comparación de métodos -->
+    <section>
+      <div class="sec-head">
+        <h2>
+          <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Comparación de métodos (mismo paso h)
+        </h2>
+        <span class="sec-tag">Evaluación t = tf</span>
+      </div>
+      <div class="scroll">
+        <table id="cmp"></table>
+      </div>
+    </section>
+
+    <!-- Efecto de reducir el paso -->
+    <section>
+      <div class="sec-head">
+        <h2>
+          <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Efecto de reducir el paso (Euler)
+        </h2>
+        <span class="sec-tag">Convergencia O(h)</span>
+      </div>
+      <div class="scroll">
+        <table id="steps"></table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- CUARTA FILA: Conclusiones y Preguntas de Reflexión -->
+  <section class="qa">
+    <div class="sec-head">
+      <h2>
+        <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Conclusiones: preguntas del desafío
+      </h2>
+      <span class="sec-tag">Análisis Técnico</span>
+    </div>
+
+    <div class="qa-grid">
+      <div class="qa-card">
+        <h3><span class="qa-num">01</span> Velocidad a los 2, 4, 10 y 20 s</h3>
+        <div class="scroll" style="margin:8px 0 10px;">
+          <table>
+            <thead>
+              <tr><th>t (s)</th><th>Euler h = 2 s</th><th>Exacta</th><th>Error abs</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>2</td><td>10,3800</td><td>9,4079</td><td>0,9721</td></tr>
+              <tr><td>4</td><td>18,6840</td><td>17,1104</td><td>1,5736</td></tr>
+              <tr><td>10</td><td>34,8934</td><td>32,8071</td><td>2,0863</td></tr>
+              <tr><td>20</td><td>46,3273</td><td>44,8761</td><td>1,4512</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>La velocidad tiende progresivamente a su velocidad límite o terminal de <strong>51,9 m/s</strong>, donde el empuje neto T equilibra el peso m·g y la fricción k·v.</p>
+      </div>
+
+      <div class="qa-card">
+        <h3><span class="qa-num">02</span> Altura calculada a los 20 s</h3>
+        <p>Euler da <strong>574,7272 m</strong> frente a <strong>589,2390 m</strong> de la solución exacta. El error absoluto es de <strong>14,5118 m</strong> (2,46 % de desviación relativa).</p>
+      </div>
+
+      <div class="qa-card">
+        <h3><span class="qa-num">03</span> Solución analítica exacta</h3>
+        <p>Integrando por separación de variables en <code>v′ = 5,19 − 0,1·v</code> con <code>v(0) = 0</code>:</p>
+        <p style="font-family:'IBM Plex Mono',monospace; padding:8px 12px; border-radius:10px; box-shadow:inset 2px 2px 4px var(--lo), inset -2px -2px 4px var(--hi);">
+          <strong>v(t) = 51,9·(1 − e^(−0,1·t))</strong>
+        </p>
+        <p>Integrando respecto al tiempo con <code>y(0) = 0</code>:</p>
+        <p style="font-family:'IBM Plex Mono',monospace; padding:8px 12px; border-radius:10px; box-shadow:inset 2px 2px 4px var(--lo), inset -2px -2px 4px var(--hi);">
+          <strong>y(t) = 51,9·t − 519·(1 − e^(−0,1·t))</strong>
+        </p>
+      </div>
+
+      <div class="qa-card">
+        <h3><span class="qa-num">04</span> Diferencias entre Euler y la solución exacta</h3>
+        <ul>
+          <li><strong>Sobreestimación de velocidad:</strong> Euler sobreestima la velocidad durante el vuelo (error de 1,4512 m/s a los 20 s), porque usa la pendiente del inicio del intervalo, que es la mayor.</li>
+          <li><strong>Subestimación de altura:</strong> Subestima la altitud alcanzada (error de 14,5118 m) al desplazar el cohete con la velocidad del inicio del intervalo, razón por la cual <code>y(2) = 0 m</code>.</li>
+          <li><strong>Evolución del error:</strong> El error de velocidad alcanza su máximo cerca de los 10 s y luego baja; el de altura se acumula monótonamente en el tiempo.</li>
+        </ul>
+      </div>
+
+      <div class="qa-card full-width">
+        <h3><span class="qa-num">05</span> Reducción del paso temporal (de 2 s a 1 s o 0,5 s)</h3>
+        <p>Al reducir el paso a la mitad, el error se reduce prácticamente a la mitad (método de primer orden): 1,4512 → 0,7141 → 0,3541 m/s en velocidad y 14,5118 → 7,1407 → 3,5412 m en altura. Con <code>h = 0,5 s</code> se cumplen ambos límites del desafío.</p>
+      </div>
+    </div>
+
+    <!-- Preguntas de reflexión -->
+    <div class="sec-head" style="margin-top:32px;">
+      <h2>
+        <svg class="icon" style="color:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Preguntas de reflexión
+      </h2>
+      <span class="sec-tag">Ingeniería de Misión</span>
+    </div>
+
+    <div class="qa-grid">
+      <div class="qa-card">
+        <h3><span class="qa-num">01</span> ¿Por qué verificar los cálculos antes de enviar astronautas?</h3>
+        <p>Porque un error de trayectoria no se puede corregir en pleno vuelo y estaba en juego una vida humana. Las computadoras de 1962 eran pioneras y se contrastaban rigurosamente con cálculos independientes analíticos y manuales.</p>
+      </div>
+
+      <div class="qa-card">
+        <h3><span class="qa-num">02</span> ¿Qué riesgos tiene un paso h excesivamente grande?</h3>
+        <p>El error de truncamiento se dispara y puede desestabilizar la física del vuelo. En este modelo Euler es estable sólo si <code>h·k/m &lt; 2</code>, es decir <code>h &lt; 20 s</code>. Superado este límite, los valores oscilan hacia el infinito.</p>
+      </div>
+
+      <div class="qa-card">
+        <h3><span class="qa-num">03</span> ¿Por qué una aproximación razonable acumula errores?</h3>
+        <p>Cada paso arrastra el error del anterior (error recursivo acumulativo). Además la altitud integra la velocidad y acumula las desviaciones. En un gráfico general la curva aproximada puede parecer similar a la real y engañar si no se mide el error numérico.</p>
+      </div>
+
+      <div class="qa-card">
+        <h3><span class="qa-num">04</span> ¿Qué variables reales no se consideraron?</h3>
+        <p>Consumo de combustible (masa variable <code>m(t)</code>), empuje modulable, resistencia cuadrática con la velocidad <code>(½·ρ·Cd·A·v²)</code>, disminución de la densidad atmosférica con la altura, variación de la gravedad terrestre, vientos cruzados y rotación terrestre.</p>
+      </div>
+
+      <div class="qa-card full-width">
+        <h3><span class="qa-num">05</span> ¿Por qué una trayectoria lunar requiere un modelo más complejo?</h3>
+        <p>Es un problema tridimensional de <em>n-cuerpos</em> acoplado no linealmente (gravedad simultánea de la Tierra, Luna y Sol). Al carecer de solución analítica cerrada y recorrer cientos de miles de kilómetros, exige algoritmos de alto orden (Runge-Kutta 4/5 con paso adaptativo) y estricto control de error.</p>
+      </div>
+    </div>
+
+    <!-- Conclusión general -->
+    <div class="callout">
+      <div class="callout-title">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Conclusión General de Ingeniería
+      </div>
+      <p>
+        Con <code>h = 2 s</code>, Euler da <strong>46,3273 m/s</strong> y <strong>574,7272 m</strong> frente a <strong>44,8761 m/s</strong> y <strong>589,2390 m</strong> exactos. En ingeniería espacial no basta con obtener un valor convergente: hay que medir su error numérico y verificar que cumpla la tolerancia requerida. Con el mismo paso temporal, <strong>RK4</strong> es rotundamente superior al ser de cuarto orden \(O(h^4)\), alcanzando una precisión milimétrica donde Euler aún comete desviaciones apreciables.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const f = (x, d = 4) => x.toLocaleString("es-ES", { minimumFractionDigits: d, maximumFractionDigits: d });
+
+function P() {
+  return {
+    m: +$("m").value,
+    T: +$("T").value,
+    g: +$("g").value,
+    k: +$("k").value,
+    tf: +$("tf").value,
+    h: +$("h").value
+  };
+}
+
+function exact(p, t) {
+  const vi = (p.T - p.m * p.g) / p.k;
+  const a = p.k / p.m;
+  return [
+    vi * (1 - Math.exp(-a * t)),
+    vi * t - (vi / a) * (1 - Math.exp(-a * t))
+  ];
+}
+
+function run(p, met, h = p.h) {
+  const F = v => (p.T / p.m) - p.g - (p.k / p.m) * v;
+  const n = Math.round(p.tf / h);
+  let v = 0, y = 0;
+  const r = [[0, 0, 0]];
+  for (let i = 1; i <= n; i++) {
+    let vn, yn;
+    if (met === "euler") {
+      vn = v + h * F(v);
+      yn = y + h * v;
+    } else if (met === "heun") {
+      const k1 = F(v);
+      const k2 = F(v + h * k1);
+      vn = v + (h / 2) * (k1 + k2);
+      yn = y + (h / 2) * (v + vn);
+    } else {
+      const k1 = F(v);
+      const k2 = F(v + (h / 2) * k1);
+      const k3 = F(v + (h / 2) * k2);
+      const k4 = F(v + h * k3);
+      vn = v + (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4);
+      yn = y + (h / 6) * (v + 2 * (v + (h / 2) * k1) + 2 * (v + (h / 2) * k2) + (v + h * k3));
+    }
+    v = vn;
+    y = yn;
+    r.push([i * h, v, y]);
+  }
+  return r;
+}
+
+// Gráficas más amplias y nítidas
+function chart(el, rows, idx, unit) {
+  const W = 720, H = 310, L = 58, B = 36, tf = rows[rows.length - 1][0];
+  const ex = [];
+  for (let i = 0; i <= 100; i++) {
+    const t = tf * i / 100;
+    ex.push([t, exact(P(), t)[idx - 1]]);
+  }
+  const mx = Math.max(...ex.map(d => d[1]), ...rows.map(d => d[idx])) * 1.08 || 1;
+  const X = t => L + (W - L - 16) * t / tf;
+  const Y = v => H - B - (H - B - 16) * v / mx;
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica de ${unit}">`;
+  
+  // Rejilla y etiquetas Y
+  for (let i = 0; i <= 4; i++) {
+    const v = mx * i / 4;
+    s += `<line x1="${L}" x2="${W - 12}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-dasharray="3,3" stroke-width="1"/>`;
+    s += `<text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11.5" font-family="'IBM Plex Mono', monospace" fill="var(--mute)">${Math.round(v)}</text>`;
+  }
+  
+  // Eje X y etiquetas de tiempo
+  s += `<line x1="${L}" x2="${W - 12}" y1="${H - B}" y2="${H - B}" stroke="var(--line)" stroke-width="1.5"/>`;
+  for (let t = 0; t <= tf; t += tf / 5) {
+    s += `<line x1="${X(t)}" x2="${X(t)}" y1="${H - B}" y2="${H - B + 4}" stroke="var(--line)" stroke-width="1.5"/>`;
+    s += `<text x="${X(t)}" y="${H - 12}" text-anchor="middle" font-size="11.5" font-family="'IBM Plex Mono', monospace" fill="var(--mute)">${+t.toFixed(1)}s</text>`;
+  }
+
+  // Solución analítica exacta (var(--b))
+  s += `<polyline fill="none" stroke="var(--b)" stroke-width="2.8" stroke-linejoin="round" points="${ex.map(d => X(d[0]) + "," + Y(d[1])).join(" ")}"/>`;
+  
+  // Método numérico (var(--a))
+  s += `<polyline fill="none" stroke="var(--a)" stroke-width="2.2" stroke-linejoin="round" points="${rows.map(d => X(d[0]) + "," + Y(d[idx])).join(" ")}"/>`;
+  
+  // Puntos con información en tooltip
+  rows.forEach(d => {
+    const exVal = exact(P(), d[0])[idx - 1];
+    const err = Math.abs(exVal - d[idx]);
+    s += `<circle cx="${X(d[0])}" cy="${Y(d[idx])}" r="3.8" fill="var(--a)" stroke="var(--bg)" stroke-width="1.5" style="cursor:pointer">
+      <title>t = ${f(d[0], 2)} s&#10;Numérico: ${f(d[idx])}&#10;Exacto: ${f(exVal)}&#10;Error: ${f(err)}</title>
+    </circle>`;
+  });
+
+  el.innerHTML = s + "</svg>";
+}
+
+const NM = { euler: "Euler", heun: "Heun", rk4: "Runge-Kutta 4" };
+
+function go() {
+  const p = P();
+  const met = $("met").value;
+  const rows = run(p, met);
+  const last = rows[rows.length - 1];
+  const [ve, ye] = exact(p, p.tf);
+  const ev = Math.abs(ve - last[1]);
+  const ey = Math.abs(ye - last[2]);
+  const vi = (p.T - p.m * p.g) / p.k;
+
+  // Ecuaciones formuladas
+  $("eq").textContent = `v′ = ${f(p.T / p.m - p.g, 2)} − ${f(p.k / p.m, 2)}·v   |   v(t) = ${f(vi, 1)}·(1 − e^(−${f(p.k / p.m, 2)}t))   |   y(t) = ${f(vi, 1)}·t − ${f(vi * p.m / p.k, 0)}·(1 − e^(−${f(p.k / p.m, 2)}t))`;
+
+  // Tarjetas métricas KPI
+  $("res").innerHTML = `
+    <div class="metric-card">
+      <div class="metric-title">Velocidad final (${NM[met]})</div>
+      <div class="metric-value-wrap">
+        <span class="metric-val">${f(last[1])}</span>
+        <span class="metric-unit">m/s</span>
+      </div>
+      <div class="metric-meta">
+        <span>Exacta: <b>${f(ve)} m/s</b></span>
+        <span>Error abs: <b style="color:${ev < 0.5 ? 'var(--ok)' : 'var(--bad)'}">${f(ev)} m/s</b></span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Altitud final (${NM[met]})</div>
+      <div class="metric-value-wrap">
+        <span class="metric-val">${f(last[2])}</span>
+        <span class="metric-unit">m</span>
+      </div>
+      <div class="metric-meta">
+        <span>Exacta: <b>${f(ye)} m</b></span>
+        <span>Error abs: <b style="color:${ey < 5 ? 'var(--ok)' : 'var(--bad)'}">${f(ey)} m</b></span>
+      </div>
+    </div>
+  `;
+
+  // Chequeos de tolerancia
+  const renderChk = (id, ok, label, errVal, limitStr) => {
+    $(id).className = "chk " + (ok ? "ok" : "no");
+    $(id).innerHTML = `
+      <div class="chk-icon">${ok ? "✓" : "✕"}</div>
+      <div>
+        <strong>${ok ? "Cumple tolerancia" : "No cumple tolerancia"}</strong>: ${label}
+        <div style="font-size:11.5px; margin-top:2px; color:var(--mute)">
+          Error obtenido: <strong>${f(errVal)}</strong> (Límite: ${limitStr})
+        </div>
+      </div>
+    `;
+  };
+
+  const okV = ev < 0.5;
+  const okY = ey < 5.0;
+  renderChk("c1", okV, "error de velocidad menor que 0,5 m/s", ev, "0,5 m/s");
+  renderChk("c2", okY, "error de altura menor que 5 m", ey, "5,0 m");
+
+  // Dictamen de vuelo
+  const passesAll = okV && okY;
+  $("msg").className = "msg-banner " + (passesAll ? "msg-ok" : "msg-no");
+  $("msg").innerHTML = passesAll 
+    ? `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+       <span><strong>Precisión suficiente para vuelo:</strong> Los cálculos cumplen ambos límites de seguridad para el despegue.</span>`
+    : `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+       <span><strong>Precisión insuficiente:</strong> El error excede la tolerancia. Prueba reduciendo el paso (h ≤ 0.5 s) o usando un método de mayor orden (Heun o RK4).</span>`;
+
+  // Botones de paso
+  $("sb").innerHTML = [2, 1, 0.5, 0.25].map(x => 
+    `<button type="button" data-h="${x}" aria-pressed="${p.h === x}">
+      ${f(x, 2)} s (${Math.round(p.tf / x)} iter.)
+    </button>`
+  ).join("");
+
+  // Gráficas más amplias
+  chart($("g1"), rows, 1, "velocidad en m/s");
+  chart($("g2"), rows, 2, "altura en m");
+
+  // Contador dinámico en la cabecera de la tabla de telemetría
+  $("tabCount").textContent = `${rows.length} puntos (tf=${p.tf}s | h=${p.h}s)`;
+
+  // Tabla de iteraciones (en vivo al lado de los parámetros)
+  $("tab").innerHTML = `
+    <thead>
+      <tr><th>t (s)</th><th>v num (m/s)</th><th>v exacta</th><th>Error v</th><th>y num (m)</th><th>y exacta</th><th>Error y</th></tr>
+    </thead>
+    <tbody>
+      ${rows.map(([t, v, y]) => {
+        const [a, b] = exact(p, t);
+        return `<tr>
+          <td>${f(t, 2)}</td>
+          <td>${f(v)}</td>
+          <td>${f(a)}</td>
+          <td>${f(Math.abs(a - v))}</td>
+          <td>${f(y)}</td>
+          <td>${f(b)}</td>
+          <td>${f(Math.abs(b - y))}</td>
+        </tr>`;
+      }).join("")}
+    </tbody>
+  `;
+
+  // Tabla comparativa
+  $("cmp").innerHTML = `
+    <thead>
+      <tr><th>Método</th><th>v(tf) (m/s)</th><th>Error v</th><th>y(tf) (m)</th><th>Error y</th></tr>
+    </thead>
+    <tbody>
+      ${Object.keys(NM).map(m => {
+        const l = run(p, m).pop();
+        const errV = Math.abs(ve - l[1]);
+        const errY = Math.abs(ye - l[2]);
+        return `<tr>
+          <td><strong>${NM[m]}</strong></td>
+          <td>${f(l[1])}</td>
+          <td style="color:${errV < 0.5 ? 'var(--ok)' : 'var(--bad)'}">${f(errV)}</td>
+          <td>${f(l[2])}</td>
+          <td style="color:${errY < 5 ? 'var(--ok)' : 'var(--bad)'}">${f(errY)}</td>
+        </tr>`;
+      }).join("")}
+    </tbody>
+  `;
+
+  // Tabla efecto del paso
+  $("steps").innerHTML = `
+    <thead>
+      <tr><th>Paso temporal h (s)</th><th>v(tf) (m/s)</th><th>Error v</th><th>y(tf) (m)</th><th>Error y</th></tr>
+    </thead>
+    <tbody>
+      ${[2, 1, 0.5, 0.25].map(h => {
+        const l = run(p, "euler", h).pop();
+        const errV = Math.abs(ve - l[1]);
+        const errY = Math.abs(ye - l[2]);
+        return `<tr>
+          <td><strong>${f(h, 2)} s</strong></td>
+          <td>${f(l[1])}</td>
+          <td style="color:${errV < 0.5 ? 'var(--ok)' : 'var(--bad)'}">${f(errV)}</td>
+          <td>${f(l[2])}</td>
+          <td style="color:${errY < 5 ? 'var(--ok)' : 'var(--bad)'}">${f(errY)}</td>
+        </tr>`;
+      }).join("")}
+    </tbody>
+  `;
+}
+
+// Event Listeners
+document.querySelectorAll("input, select").forEach(e => e.addEventListener("input", go));
+
+$("sb").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (b) {
+    $("h").value = b.dataset.h;
+    go();
+  }
+});
+
+// Restaurar parámetros 1962
+$("btnReset")?.addEventListener("click", () => {
+  $("m").value = 1000;
+  $("T").value = 15000;
+  $("g").value = 9.81;
+  $("k").value = 100;
+  $("tf").value = 20;
+  $("h").value = 2;
+  $("met").value = "euler";
+  go();
+});
+
+// Exportar telemetría CSV
+$("btnExportCsv")?.addEventListener("click", () => {
+  const p = P(), met = $("met").value, rows = run(p, met);
+  let csv = "t (s),v num (m/s),v exacta (m/s),Error v,y num (m),y exacta (m),Error y\n";
+  rows.forEach(([t, v, y]) => {
+    const [a, b] = exact(p, t);
+    csv += `${t},${v},${a},${Math.abs(a - v)},${y},${b},${Math.abs(b - y)}\n`;
+  });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `telemetria_cohete_${met}_tf${p.tf}_h${p.h}.csv`;
+  link.click();
+});
+
+// Inicialización
+go();
+</script>
+</body>
+</html>
